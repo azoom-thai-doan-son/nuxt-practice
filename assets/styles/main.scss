@@ -19,6 +19,11 @@ h5,
 p {
   margin: 0;
 }
+a,
 a {
+  color: whitesmoke;
   text-decoration: none;
+}
+a.nuxt-link-active {
+  color: rgb(26, 202, 70);
 }

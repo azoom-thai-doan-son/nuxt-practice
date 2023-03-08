@@ -1,35 +1,25 @@
 <template>
-  <div>
-    <header>hi</header>
-    <Nuxt />
+  <div class="default-layout">
+    <notifications />
+    <AppHeader />
+    <v-app>
+      <Nuxt />
+    </v-app>
   </div>
 </template>
 
 <script>
 export default {
   name: "DefaultLayout",
-  data() {
-    return {
-      clipped: false,
-      drawer: false,
-      fixed: false,
-      items: [
-        {
-          icon: "mdi-apps",
-          title: "Welcome",
-          to: "/",
-        },
-        {
-          icon: "mdi-chart-bubble",
-          title: "Inspire",
-          to: "/inspire",
-        },
-      ],
-      miniVariant: false,
-      right: true,
-      rightDrawer: false,
-      title: "Vuetify.js",
-    };
-  },
 };
 </script>
+
+<style lang="css" scoped>
+.default-layout {
+  min-height: 100vh;
+  background-color: #ddd0c8;
+}
+::v-deep .v-application {
+  background-color: #ddd0c8 !important;
+}
+</style>

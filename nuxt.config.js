@@ -25,6 +25,7 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
+    '@/plugins/components.js', '@/plugins/vuelidate.js', { src: '@/plugins/notification.js', mode: 'client' }
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -44,7 +45,7 @@ export default {
   vuetify: {
     customVariables: ['~/assets/styles/variables.scss'],
     theme: {
-      dark: true,
+      dark: false,
       themes: {
         dark: {
           primary: colors.blue.darken2,
@@ -54,12 +55,25 @@ export default {
           warning: colors.amber.base,
           error: colors.deepOrange.accent4,
           success: colors.green.accent3
-        }
+        },
+        // light: {
+        //   background: '#FFFFFF',
+        //   surface: '#FFFFFF',
+        //   primary: '#6200EE',
+        //   'primary-darken-1': '#3700B3',
+        //   secondary: '#03DAC6',
+        //   'secondary-darken-1': '#018786',
+        //   error: '#B00020',
+        //   info: '#2196F3',
+        //   success: '#4CAF50',
+        //   warning: '#FB8C00',
+        // }
       }
     }
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+    transpile: ['ky']
   }
 }
