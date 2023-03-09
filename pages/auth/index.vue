@@ -95,6 +95,7 @@
 </template>
 
 <script>
+import { db, auth, usersCollection } from "@/plugins/firebase";
 import ky from "@/plugins/ky";
 import DatePicker from "@/components/DatePicker.vue";
 import {
@@ -263,35 +264,25 @@ export default {
     async login() {
       commit("SET_IS_LOADING", true);
       const { user, password } = this.loginInfo;
-      const response = await ky
-        .get("users", { searchParams: { email: user } })
-        .json();
-      if (response.length) {
-        if (password !== response[0].email) {
-          this.$notify({
-            type: "error",
-            text: "Incorrect password",
-          });
-        } else {
-          const { username, email } = response[0];
-          this.$router.push({ name: "posts" });
-          commit("SET_USER_INFO", {
-            username,
-            email,
-            phoneNumber: "0393616326",
-            gender: "male",
-            dateOfBirth: "2001-01-01",
-          });
-          this.$notify({
-            type: "success",
-            text: "Login successfully!",
-          });
-        }
-      } else {
-        this.$notify({
-          type: "error",
-          text: "Incorrect credential",
+      try {
+        const credential = await auth.signInWithEmailAndPassword(
+          user,
+          password
+        );
+
+        const res = await usersCollection.doc(credential.user.uid).get();
+        console.log("res", res.data());
+        commit("SET_USER_INFO", {
+          ...res.data(),
         });
+        this.$router.push({ name: "posts" });
+
+        this.$notify({
+          type: "success",
+          text: "Login successfully!",
+        });
+      } catch (error) {
+        this.$notify({ type: "error", text: error });
       }
       commit("SET_IS_LOADING", false);
     },
@@ -301,34 +292,39 @@ export default {
       this.loginInfo.password = "";
     },
     async register() {
-      const { username, email, phoneNumber, gender, dateOfBirth } =
+      const { username, email, phoneNumber, password, gender, dateOfBirth } =
         this.registerInfo;
       try {
         commit("SET_IS_LOADING", true);
-        const response = await ky
-          .post("users", {
-            body: {
-              username,
-              email,
-              phoneNumber,
-              gender,
-              dateOfBirth,
-            },
-          })
-          .json();
+        const credential = await auth.createUserWithEmailAndPassword(
+          email,
+          password
+        );
+
+        await usersCollection.doc(credential.user.uid).set({
+          username,
+          email,
+          phoneNumber,
+          gender,
+          dateOfBirth,
+        });
+        await credential.user.updateProfile({
+          displayName: username,
+        });
+        console.log(credential);
+
         commit("SET_USER_INFO", {
           username,
           email,
           phoneNumber,
           gender,
           dateOfBirth,
-          id: response.id,
         });
+        this.$router.push({ name: "posts" });
         this.$notify({
           type: "success",
           text: "Register successfully",
         });
-        this.$router.push({ name: "posts" });
       } catch (error) {
         this.$notify({
           type: "error",

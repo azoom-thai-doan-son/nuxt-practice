@@ -9,7 +9,9 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
+    "@nuxtjs/firebase": "^8.2.2",
     "core-js": "^3.25.3",
+    "firebase": "^8",
     "ky": "0.30.0",
     "ky-universal": "^0.11.0",
     "nuxt": "^2.15.8",

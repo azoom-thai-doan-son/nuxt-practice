@@ -25,7 +25,10 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
-    '@/plugins/components.js', '@/plugins/vuelidate.js', { src: '@/plugins/notification.js', mode: 'client' }
+    '@/plugins/components.js',
+    '@/plugins/vuelidate.js',
+    { src: '@/plugins/notification.js', mode: 'client' },
+    '@/plugins/firebase.js'
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -35,11 +38,27 @@ export default {
   buildModules: [
     // https://go.nuxtjs.dev/vuetify
     '@nuxtjs/vuetify',
+    // '@nuxtjs/firebase'
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
   ],
+  // firebase: {
+  //   config: {
+  //     apiKey: "AIzaSyCmhjoOzSjBAlrEwwaxrKo3ThZyH457cfM",
+  //     authDomain: "nuxt-app-a951d.firebaseapp.com",
+  //     databaseURL: "https://nuxt-app-a951d-default-rtdb.firebaseio.com",
+  //     projectId: "nuxt-app-a951d",
+  //     storageBucket: "nuxt-app-a951d.appspot.com",
+  //     messagingSenderId: "930454941618",
+  //     appId: "1:930454941618:web:ffc7f25085f87808fffeab"
+  //   },
+  //   services: {
+  //     auth: true,
+  //     firestore: true
+  //   }
+  // },
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
@@ -72,6 +91,9 @@ export default {
     }
   },
 
+  loading: {
+    color: '#1976d2 '
+  },
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
     transpile: ['ky']
