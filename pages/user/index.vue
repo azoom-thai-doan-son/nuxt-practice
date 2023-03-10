@@ -90,6 +90,7 @@ import {
   emailError,
   phoneNumberError,
 } from "@/utils/errorMessages";
+import { usersCollection } from "~/plugins/firebase";
 const phoneNumber = helpers.regex(
   "phoneNumber",
   /(84|0[3|5|7|8|9])+([0-9]{8})\b/
@@ -176,12 +177,27 @@ export default {
       this.isEditing = false;
       this.$v.userInfo.$reset();
     },
-    submit() {
-      commit("SET_USER_INFO", this.userInfo);
-      this.userInfo = this.$store.copy("userInfo");
-      this.$notify({ type: "success", text: "Updated successfully" });
-      this.$v.userInfo.$reset();
-      this.isEditing = false;
+    async submit() {
+      const { username, email, phoneNumber, dateOfBirth, gender } =
+        this.userInfo;
+      try {
+        commit("SET_IS_LOADING", true);
+        await usersCollection.doc(this.userInfo.id).update({
+          username,
+          email,
+          phoneNumber,
+          dateOfBirth,
+          gender,
+        });
+        commit("SET_USER_INFO", this.userInfo);
+        this.userInfo = this.$store.copy("userInfo");
+        this.$notify({ type: "success", text: "Updated successfully" });
+        this.$v.userInfo.$reset();
+        this.isEditing = false;
+      } catch (error) {
+        this.$notify({ type: "error", text: error });
+      }
+      commit("SET_IS_LOADING", false);
     },
   },
   created() {

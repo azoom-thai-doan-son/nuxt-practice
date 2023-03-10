@@ -13,14 +13,14 @@
           class="avatar"
         />
         <div>
-          <h3 class="username">{{ post?.user?.username }}</h3>
-          <p class="email">{{ post?.user?.email }}</p>
+          <h3 class="username">{{ post?.author?.username }}</h3>
+          <p class="email">{{ post?.author?.email }}</p>
         </div>
       </div>
       <v-card-title primary-title class="title">
         {{ post?.title }}
       </v-card-title>
-      <v-card-text class="body">{{ post?.body }}</v-card-text>
+      <v-card-text class="body">{{ post?.body | truncate(160) }}</v-card-text>
     </v-card>
   </NuxtLink>
 </template>
@@ -64,11 +64,12 @@ export default {
   }
 }
 .title {
-  font-size: 2rem;
-  padding-top: 8px;
+  font-size: 1.6rem !important;
+  padding-top: 0px;
+  padding-bottom: 8px;
   font-weight: 600;
 }
 .body {
-  font-size: 13px;
+  font-size: 16px;
 }
 </style>

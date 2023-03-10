@@ -21,7 +21,9 @@
           <div class="footer">
             <v-btn
               @click="login"
-              :disabled="$v.loginInfo.$invalid || $v.loginInfo.$error"
+              :disabled="
+                $v.loginInfo.$invalid || $v.loginInfo.$error || isLoading
+              "
             >
               submit
             </v-btn>
@@ -96,7 +98,7 @@
 
 <script>
 import { db, auth, usersCollection } from "@/plugins/firebase";
-import ky from "@/plugins/ky";
+import Cookie from "js-cookie";
 import DatePicker from "@/components/DatePicker.vue";
 import {
   minLength,
@@ -269,11 +271,13 @@ export default {
           user,
           password
         );
+        const token = await auth.currentUser.getIdToken();
+        Cookie.set("access_token", token);
 
         const res = await usersCollection.doc(credential.user.uid).get();
-        console.log("res", res.data());
         commit("SET_USER_INFO", {
           ...res.data(),
+          id: res.id,
         });
         this.$router.push({ name: "posts" });
 
@@ -311,9 +315,11 @@ export default {
         await credential.user.updateProfile({
           displayName: username,
         });
-        console.log(credential);
+        const token = await auth.currentUser.getIdToken();
+        Cookie.set("access_token", token);
 
         commit("SET_USER_INFO", {
+          id: credential.user.uid,
           username,
           email,
           phoneNumber,

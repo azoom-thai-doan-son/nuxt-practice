@@ -6,16 +6,6 @@
       <h2>Go back</h2>
     </button>
     <form class="form">
-      <v-select
-        :items="authors"
-        v-model="authorId"
-        filled
-        label="Author"
-        dense
-        @change="$v.authorId.$touch()"
-        @blur="$v.authorId.$touch()"
-        :error-messages="authorErrors"
-      ></v-select>
       <v-text-field
         label="Title"
         @blur="$v.title.$touch()"
@@ -46,27 +36,20 @@
   </div>
 </template>
 <script>
-import ky from "@/plugins/ky";
 import { dispatch, commit, get } from "vuex-pathify";
 import { required, minLength, maxLength } from "vuelidate/lib/validators";
+import { postsCollection } from "~/plugins/firebase";
 export default {
   name: "PostCreateView",
   data() {
     return {
-      authorId: "",
       title: "",
       body: "",
     };
   },
   computed: {
-    authors: get("authors"),
+    userInfo: get("userInfo"),
     isLoading: get("isLoading"),
-    authorErrors() {
-      const errors = [];
-      if (!this.$v.authorId.$dirty) return errors;
-      !this.$v.authorId.required && errors.push("This field is required");
-      return errors;
-    },
     titleErrors() {
       const errors = [];
       if (!this.$v.title.$dirty) return errors;
@@ -89,9 +72,6 @@ export default {
     },
   },
   validations: {
-    authorId: {
-      required,
-    },
     title: {
       required,
       minLength: minLength(10),
@@ -108,24 +88,32 @@ export default {
       const newPost = {
         title: this.title,
         body: this.body,
-        userId: this.authorId,
+        authorId: this.userInfo.id,
+        createdAt: new Date().toString(),
+        updatedAt: new Date().toString(),
       };
       commit("SET_IS_LOADING", true);
-      const response = await dispatch("addPost", newPost);
-      const author = await ky.get(`users/${this.authorId}`).json();
-      response.user = author;
-      response.id = Math.ceil(Math.random() * 10000);
+      try {
+        const postRef = await postsCollection.add({ ...newPost });
+        console.log("author", this.userInfo);
+        commit("ADD_POST", {
+          id: postRef.id,
+          ...newPost,
+          author: this.$store.copy("userInfo"),
+        });
+        this.$router.replace({
+          name: "posts-postId",
+          params: { postId: postRef.id },
+        });
+        this.$notify({ type: "success", text: "New post added successfully" });
+      } catch (error) {
+        this.$notify({ type: "error", text: error });
+      }
 
-      commit("ADD_POST", response);
       commit("SET_IS_LOADING", false);
-      this.$router.replace({
-        name: "PostDetail",
-        params: { postId: response.id },
-      });
     },
     onClear() {
       this.$v.$reset();
-      this.authorId = "";
       this.title = "";
       this.body = "";
     },

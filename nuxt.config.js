@@ -25,6 +25,7 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
+    '@plugins/filters.js',
     '@/plugins/components.js',
     '@/plugins/vuelidate.js',
     { src: '@/plugins/notification.js', mode: 'client' },
@@ -94,6 +95,10 @@ export default {
   loading: {
     color: '#1976d2 '
   },
+  router: {
+    middleware: ['authenticate',]
+  },
+  serverMiddleware: ['@/middleware/redirect.js'],
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
     transpile: ['ky']

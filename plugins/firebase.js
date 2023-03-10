@@ -18,5 +18,6 @@ const auth = firebase.auth()
 const db = firebase.firestore()
 const postsCollection = db.collection('posts')
 const usersCollection = db.collection('users')
+const commentsCollection = db.collection('comments')
 
-export { auth, postsCollection, usersCollection, db }
+export { auth, postsCollection, usersCollection, commentsCollection, db }

@@ -1,8 +1,8 @@
 <template>
   <div class="default-layout">
     <notifications />
-    <AppHeader />
     <v-app>
+      <AppHeader />
       <Nuxt />
     </v-app>
   </div>

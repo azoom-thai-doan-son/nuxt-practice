@@ -11,7 +11,8 @@
           outlined
         ></v-text-field>
         <v-select
-          :items="authors"
+          clearable
+          :items="authorsDropdown"
           label="Select author"
           v-model="authorId"
           class="author"
@@ -21,7 +22,7 @@
       </div>
     </div>
 
-    <div class="error" v-if="!currentPosts.length && !isLoading">
+    <div class="no-posts-error" v-if="!currentPosts.length && !isLoading">
       <h1>
         Oops! No Posts Found. Click
         <span class="get-btn" @click="getAllPosts">here </span> to get all
@@ -60,6 +61,12 @@ export default {
   computed: {
     currentPosts: get("currentPosts"),
     authors: get("authors"),
+    authorsDropdown() {
+      return this.authors.map((author) => ({
+        value: author.id,
+        text: author.username,
+      }));
+    },
     allPosts: get("allPosts"),
     pageTotal() {
       return Math.ceil(this.allPosts.length / DEFAULT_LIMIT);
@@ -74,7 +81,6 @@ export default {
       commit("SET_IS_LOADING", false);
     },
     onClickNewPost() {
-      console.log(this.$router);
       this.$router.push({ name: "posts-create" });
     },
     async onSearch() {
@@ -93,11 +99,7 @@ export default {
     },
   },
   async created() {
-    commit("SET_IS_LOADING", true);
-    await dispatch("getAllPosts");
-    await dispatch("getCurrentPosts", this.page);
-    await dispatch("getAuthors");
-    commit("SET_IS_LOADING", false);
+    await this.getAllPosts();
   },
 };
 </script>
@@ -106,9 +108,11 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  z-index: 0;
+  height: 100%;
   padding-bottom: 16px;
 
-  > .error {
+  .no-posts-error {
     margin-top: 32px;
   }
   > .head {
@@ -131,7 +135,7 @@ export default {
   }
   > .footer {
     width: 400px;
-    margin: 0 auto;
+    margin: auto auto 0;
   }
 }
 //Colours
