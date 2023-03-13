@@ -2,7 +2,6 @@
   <div class="post-page">
     <Loading :active="isLoading" :is-full-page="true"></Loading>
     <div class="head">
-      <button class="button -primary" @click="onClickNewPost">New Post</button>
       <div class="search-form">
         <v-text-field
           clearable
@@ -80,9 +79,6 @@ export default {
       window.scrollTo({ top: 0, behavior: "smooth" });
       commit("SET_IS_LOADING", false);
     },
-    onClickNewPost() {
-      this.$router.push({ name: "posts-create" });
-    },
     async onSearch() {
       this.page = 1;
       const query = { search: this.search, authorId: this.authorId };
@@ -129,9 +125,9 @@ export default {
   }
   > .body {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 16px;
-    justify-content: center;
+    align-items: center;
   }
   > .footer {
     width: 400px;
@@ -148,45 +144,8 @@ $blue: #3498db;
   }
 }
 
-.button {
-  appearance: none;
-  background-color: transparent;
-  border: 2px solid $red;
-  border-radius: 0.6em;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  align-self: center;
-  line-height: 1;
-  margin: 20px;
-  padding: 1.2em 2.8em;
-  text-decoration: none;
-  text-align: center;
-  text-transform: uppercase;
-  font-weight: 700;
-  font-size: 20px;
-
-  &:hover,
-  &:focus {
-    outline: 0;
-  }
-}
-
-.button.-primary {
-  border-color: $blue;
-  color: #fff;
-  box-shadow: 0 0 40px 40px $blue inset, 0 0 0 0 $blue;
-  transition: all 150ms ease-in-out;
-
-  &:hover {
-    box-shadow: 0 0 10px 0 $blue inset, 0 0 20px 0px $blue;
-    color: black;
-  }
-}
-
 .search-form {
+  margin-top: 24px;
   display: flex;
   align-items: center;
   gap: 12px;

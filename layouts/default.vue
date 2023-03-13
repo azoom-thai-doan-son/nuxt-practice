@@ -21,5 +21,6 @@ export default {
 }
 ::v-deep .v-application {
   background-color: #ddd0c8 !important;
+  font-family: "Tilt Neon", sans-serif;
 }
 </style>

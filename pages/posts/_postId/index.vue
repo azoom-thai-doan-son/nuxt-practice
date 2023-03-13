@@ -5,7 +5,7 @@
       <img src="@/assets/images/back-icon.svg" width="24" height="24" alt="" />
       <h2>Go back</h2>
     </button>
-    <!-- <PostCard :post="post" /> -->
+
     <v-card outline width="850" class="post-card">
       <div class="header">
         <img
@@ -25,9 +25,44 @@
       </v-card-title>
       <v-card-text class="body">{{ post?.body }}</v-card-text>
     </v-card>
-    <v-divider dark></v-divider>
+
     <div class="comment-section">
       <h1 class="title">Top Comments ({{ comments.length }})</h1>
+
+      <!-- Add new comment -->
+      <div class="new-comment-section">
+        <div class="input">
+          <img
+            src="@/assets/images/avatar.svg"
+            alt=""
+            width="30"
+            height="30"
+            class="avatar"
+          />
+          <v-textarea
+            background-color="grey lighten-2"
+            auto-grow
+            rows="3"
+            v-model="comment"
+            @blur="$v.comment.$touch()"
+            @click="isShowSubmitBtn = true"
+            :error-messages="commentErrors"
+            class="textarea"
+            placeholder="Add to the discussion"
+          ></v-textarea>
+        </div>
+        <v-btn
+          color="primary"
+          class="submitbtn"
+          :disabled="$v.comment.$invalid || $v.comment.$error"
+          v-show="isShowSubmitBtn"
+          @click="addNewComment"
+          >Submit</v-btn
+        >
+        <v-btn @click="cancel" v-show="isShowSubmitBtn">Cancel</v-btn>
+      </div>
+
+      <!-- List of comments -->
       <CommentItem
         v-for="comment in comments"
         :key="comment.id"
@@ -40,6 +75,8 @@
 import { get, commit } from "vuex-pathify";
 import PostCard from "@/components/PostCard.vue";
 import CommentItem from "@/components/CommentItem.vue";
+import { requiredError, maxLengthError } from "@/utils/errorMessages";
+import { required, maxLength } from "vuelidate/lib/validators";
 import {
   commentsCollection,
   postsCollection,
@@ -56,10 +93,52 @@ export default {
     return {
       comments: [],
       post: {},
+      comment: "",
+      isShowSubmitBtn: false,
     };
+  },
+  validations: {
+    comment: {
+      required,
+      maxLength: maxLength(999),
+    },
   },
   computed: {
     isLoading: get("isLoading"),
+    userInfo: get("userInfo"),
+    commentErrors() {
+      const errors = [];
+      if (!this.$v.comment.$dirty) return errors;
+      !this.$v.comment.required && errors.push(requiredError);
+      !this.$v.comment.maxLength && errors.push(maxLengthError(999));
+      return errors;
+    },
+  },
+  methods: {
+    async addNewComment() {
+      const newComment = {
+        postId: this.$route.params.postId,
+        userId: this.userInfo.id,
+        body: this.comment,
+        createdAt: new Date().toString(),
+        updatedAt: new Date().toString(),
+      };
+      try {
+        await commentsCollection.add(newComment);
+        this.comments.push({ ...newComment, user: { ...this.userInfo } });
+        this.$v.$reset();
+        this.comment = "";
+        this.isShowSubmitBtn = false;
+        this.$notify({ type: "success", text: "Comment added successfully" });
+      } catch (error) {
+        this.$notify({ type: "error", text: error });
+      }
+    },
+    cancel() {
+      this.$v.$reset();
+      this.comment = "";
+      this.isShowSubmitBtn = false;
+    },
   },
 
   async asyncData({ params }) {
@@ -74,17 +153,19 @@ export default {
       const snapshots = await commentsCollection
         .where("postId", "==", postRef.id)
         .get();
-      snapshots.forEach((doc) => {
+      snapshots.forEach(async (doc) => {
+        const userRef = await usersCollection.doc(doc.data().userId).get();
         comments.push({
           ...doc.data(),
           id: doc.id,
+          user: { ...userRef.data() },
         });
       });
     } catch (error) {
-      console.error(error);
+      this.$notify({ type: "error", text: error });
     }
     commit("SET_IS_LOADING", false);
-    console.log(post);
+    console.log(comments);
     return { post, comments };
   },
 };
@@ -114,8 +195,8 @@ export default {
     }
   }
 }
-::v-deep .v-card {
-  border-radius: 24px;
+::v-deep .post-card {
+  border-radius: 12px;
   margin: 12px;
   .header {
     display: flex;
@@ -144,6 +225,38 @@ export default {
   }
   .body {
     font-size: 14px;
+  }
+}
+.new-comment-section {
+  width: 777px;
+  margin-bottom: 24px;
+  > .input {
+    display: flex;
+    > .textarea {
+      max-height: 200px;
+      overflow: auto;
+      ::v-deep textarea {
+        padding: 16px;
+      }
+    }
+
+    ::v-deep .v-input {
+      padding: 0;
+    }
+  }
+  > ::v-deep .submitbtn {
+    margin-left: 36px;
+    margin-right: 8px;
+  }
+  .avatar {
+    width: 30px;
+    height: 30px;
+    padding: 6px 4px;
+    border-radius: 100%;
+    margin-right: 6px;
+    background-color: gainsboro;
+    position: relative;
+    top: 12px;
   }
 }
 </style>
